@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b1220" />
+    <title>SeguroChain | Gestão de sinistros</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <aside class="sidebar">
+      <a class="brand" href="#inicio"><span class="brand-mark">S</span><span>Seguro<span>Chain</span></span></a>
+      <nav aria-label="Navegação principal">
+        <a class="active" href="#inicio">Visão geral</a>
+        <a href="#apolices">Apólices</a>
+        <a href="#sinistros">Sinistros</a>
+        <a href="#auditoria">Auditoria blockchain</a>
+      </nav>
+      <div class="sidebar-footer"><span class="dot"></span> Rede simulada ativa<br /><small>Smart Contract v1.0</small></div>
+    </aside>
+
+    <main>
+      <header>
+        <div><p class="eyebrow">PORTAL DA SEGURADORA</p><h1>Olá, SeguroChain</h1><p class="muted">Acompanhe a proteção dos seus clientes em um só lugar.</p></div>
+        <button class="button primary" data-open="policy-modal">+ Nova apólice</button>
+      </header>
+
+      <section id="inicio" class="metrics" aria-label="Resumo">
+        <article><p>Apólices ativas</p><strong id="metric-policies">0</strong><span>Proteções vigentes</span></article>
+        <article><p>Sinistros em análise</p><strong id="metric-pending">0</strong><span>Aguardando validação</span></article>
+        <article><p>Indenizações pagas</p><strong id="metric-paid">R$ 0,00</strong><span>Registradas na rede</span></article>
+      </section>
+
+      <section class="content-grid">
+        <article class="panel flow-panel">
+          <div class="section-title"><div><p class="eyebrow">FLUXO PROTEGIDO</p><h2>Como funciona</h2></div></div>
+          <ol class="flow">
+            <li><b>1</b><div><strong>Emitir apólice</strong><span>Defina veículo, coberturas e limite.</span></div></li>
+            <li><b>2</b><div><strong>Cliente abre sinistro</strong><span>O evento fica em análise.</span></div></li>
+            <li><b>3</b><div><strong>Smart Contract valida</strong><span>Vigência, cobertura e valor são verificados.</span></div></li>
+            <li><b>4</b><div><strong>Pagamento auditável</strong><span>Decisão e pagamento entram na blockchain.</span></div></li>
+          </ol>
+        </article>
+        <article class="panel highlight">
+          <p class="eyebrow">PRÓXIMA AÇÃO</p><h2 id="action-title">Nenhuma pendência</h2><p id="action-description">Abra um sinistro para iniciar uma análise automatizada.</p>
+          <a class="button light" id="action-link" href="#sinistros">Ver sinistros</a>
+        </article>
+      </section>
+
+      <section id="apolices" class="section">
+        <div class="section-title"><div><p class="eyebrow">CARTEIRA</p><h2>Apólices</h2></div><button class="button secondary" data-open="policy-modal">+ Emitir apólice</button></div>
+        <div class="panel table-wrap"><table><thead><tr><th>Apólice</th><th>Cliente / veículo</th><th>Coberturas</th><th>Vigência</th><th>Status</th><th></th></tr></thead><tbody id="policies-body"></tbody></table><div class="empty" id="policies-empty">Ainda não há apólices emitidas.</div></div>
+      </section>
+
+      <section id="sinistros" class="section">
+        <div class="section-title"><div><p class="eyebrow">ATENDIMENTO</p><h2>Sinistros</h2></div><button class="button secondary" data-open="claim-modal">+ Abrir sinistro</button></div>
+        <div class="panel table-wrap"><table><thead><tr><th>Sinistro</th><th>Apólice</th><th>Ocorrência</th><th>Valor solicitado</th><th>Status</th><th>Ação</th></tr></thead><tbody id="claims-body"></tbody></table><div class="empty" id="claims-empty">Nenhum sinistro aberto.</div></div>
+      </section>
+
+      <section id="auditoria" class="section">
+        <div class="section-title"><div><p class="eyebrow">IMUTABILIDADE</p><h2>Auditoria blockchain</h2></div><span class="chain-state"><span class="dot"></span> Cadeia íntegra</span></div>
+        <div class="panel ledger" id="ledger"><div class="empty">Eventos de análise e pagamento aparecerão aqui.</div></div>
+      </section>
+    </main>
+
+<dialog id="policy-modal"><form method="dialog" id="policy-form"><div class="modal-head"><div><p class="eyebrow">NOVA PROTEÇÃO</p><h2>Emitir apólice</h2></div><button class="icon-button" value="cancel" aria-label="Fechar">×</button></div><div class="form-grid"><label>Nome do cliente<input required name="client" placeholder="Ex.: João Silva" /></label><label>Carteira do cliente<input required name="wallet" placeholder="Ex.: 0xJOAO..." /></label><label>Modelo do veículo<input required name="vehicle" placeholder="Ex.: Toyota Corolla" /></label><label>Placa<input required name="plate" placeholder="ABC-1234" /></label><label>Ano<input required name="year" type="number" min="1900" max="2100" value="2024" /></label><label>Valor segurado<input required name="coverageValue" type="number" min="1" step="0.01" placeholder="80000" /></label><label>Início da vigência<input required name="start" type="date" /></label><label>Fim da vigência<input required name="end" type="date" /></label></div><fieldset><legend>Coberturas contratadas</legend><label class="check"><input type="checkbox" name="cover" value="COLISAO" checked /> Colisão</label><label class="check"><input type="checkbox" name="cover" value="ROUBO" checked /> Roubo</label><label class="check"><input type="checkbox" name="cover" value="INCENDIO" /> Incêndio</label></fieldset><div class="modal-actions"><button class="button secondary" value="cancel">Cancelar</button><button class="button primary" value="default">Emitir apólice</button></div></form></dialog>
+
+    <dialog id="claim-modal"><form method="dialog" id="claim-form"><div class="modal-head"><div><p class="eyebrow">NOVO EVENTO</p><h2>Abrir sinistro</h2></div><button class="icon-button" value="cancel" aria-label="Fechar">×</button></div><div class="form-grid"><label class="full">Apólice<select required name="policy" id="claim-policy"></select></label><label>Tipo da ocorrência<select required name="type"><option value="COLISAO">Colisão</option><option value="ROUBO">Roubo</option><option value="INCENDIO">Incêndio</option></select></label><label>Data da ocorrência<input required name="date" type="date" /></label><label class="full">Valor solicitado<input required name="amount" type="number" min="1" step="0.01" placeholder="15000" /></label></div><p class="hint">A decisão será tomada somente pelo Smart Contract após a abertura.</p><div class="modal-actions"><button class="button secondary" value="cancel">Cancelar</button><button class="button primary" value="default">Abrir para análise</button></div></form></dialog>
+
+    <dialog id="analysis-modal"><div id="analysis-content"></div></dialog>
+    <div id="toast" role="status"></div>
+    <script src="app.js"></script>
+  </body>
+</html>

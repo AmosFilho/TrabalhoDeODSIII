@@ -12,7 +12,7 @@ public class Blockchain {
     blocks = new ArrayList<>();
     
     // cria o primeiro block
-    Block b = new Block(0, System.currentTimeMillis(), null, "Block gênesis");
+    Block b = new Block(0, System.currentTimeMillis(), null, "Block gÃªnesis");
     b.proofOfWork(difficulty);
     blocks.add(b);
   }

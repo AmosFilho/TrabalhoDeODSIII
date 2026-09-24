@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Blockchain {
@@ -11,14 +12,22 @@ public class Blockchain {
     this.difficulty = difficulty;
     blocks = new ArrayList<>();
     
-    // cria o primeiro block
-    Block b = new Block(0, System.currentTimeMillis(), null, "Block gênesis");
+    // cria o primeiro block — previousHash = "0" (convenção: sem bloco anterior)
+    Block b = new Block(0, System.currentTimeMillis(), "0", "Block gênesis");
     b.proofOfWork(difficulty);
     blocks.add(b);
   }
 
   public int getDifficulty() {
     return difficulty;
+  }
+
+  public void setDifficulty(int difficulty) {
+    this.difficulty = difficulty;
+  }
+
+  public List<Block> getBlocks() {
+    return Collections.unmodifiableList(blocks);
   }
 
   public Block latestBlock() {
@@ -39,6 +48,16 @@ public class Blockchain {
     }
   }
 
+  /**
+   * Adiciona um bloco já reconstruído (lido do ledger) sem refazer proof-of-work.
+   * O bloco deve ser criado com o construtor de reconstrução de Block.
+   */
+  public void addReconstructedBlock(Block b) {
+    if (b != null) {
+      blocks.add(b);
+    }
+  }
+
   public boolean isFirstBlockValid() {
     Block firstBlock = blocks.get(0);
 
@@ -46,7 +65,8 @@ public class Blockchain {
       return false;
     }
 
-    if (firstBlock.getPreviousHash() != null) {
+    // O genesis usa previousHash = "0" (convenção)
+    if (firstBlock.getPreviousHash() == null || !firstBlock.getPreviousHash().equals("0")) {
       return false;
     }
 

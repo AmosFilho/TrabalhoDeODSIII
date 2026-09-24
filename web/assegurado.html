@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b1220" />
+    <meta name="description" content="SeguroChain — Portal do assegurado. Acompanhe suas apólices, sinistros e decisões registradas na blockchain." />
+    <title>SeguroChain | Portal do Assegurado</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="assegurado-page">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#inicio"><span class="brand-mark"><i class="ri-shield-keyhole-fill"></i></span><span>Seguro<span>Chain</span></span></a>
+      <nav aria-label="Navegação principal">
+        <a class="active" href="#inicio" data-nav><i class="ri-home-heart-line"></i> Meu painel</a>
+        <a href="#minhas-apolices" data-nav><i class="ri-file-shield-2-line"></i> Minhas apólices</a>
+        <a href="#meus-sinistros" data-nav><i class="ri-alarm-warning-line"></i> Meus sinistros</a>
+        <a href="#transparencia" data-nav><i class="ri-link-unlink-m"></i> Transparência</a>
+      </nav>
+      <div class="sidebar-nav-pages">
+        <p class="eyebrow" style="margin-bottom:8px;padding:0 14px">PORTAIS</p>
+        <a href="index.html" class="portal-link"><i class="ri-building-2-line"></i> Seguradora</a>
+        <a href="assegurado.html" class="portal-link active-portal"><i class="ri-user-heart-line"></i> Assegurado</a>
+      </div>
+      <div class="sidebar-footer"><span class="dot"></span> Rede simulada ativa<br /><small>Smart Contract v1.0</small></div>
+    </aside>
+
+    <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menu"><i class="ri-menu-3-line"></i></button>
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <main>
+      <header>
+        <div>
+          <p class="eyebrow">PORTAL DO ASSEGURADO</p>
+          <h1>Bem-vindo <i class="ri-user-heart-fill" style="color:var(--teal);font-size:24px"></i></h1>
+          <p class="muted">Acompanhe suas apólices e sinistros com total transparência.</p>
+        </div>
+        <button class="button primary-teal" data-open="claim-modal-client"><i class="ri-alarm-warning-line"></i> Abrir sinistro</button>
+      </header>
+
+      <section id="inicio" class="metrics animate__animated animate__fadeInUp" aria-label="Resumo">
+        <article class="teal-accent"><div class="metric-icon teal"><i class="ri-file-shield-2-line"></i></div><div><p>Minhas apólices</p><strong id="c-metric-policies">0</strong><span>Contratos vigentes</span></div></article>
+        <article class="teal-accent"><div class="metric-icon warning"><i class="ri-time-line"></i></div><div><p>Em análise</p><strong id="c-metric-pending">0</strong><span>Sinistros aguardando</span></div></article>
+        <article class="teal-accent"><div class="metric-icon success"><i class="ri-check-double-line"></i></div><div><p>Resolvidos</p><strong id="c-metric-resolved">0</strong><span>Sinistros concluídos</span></div></article>
+      </section>
+
+      <section class="content-grid">
+        <article class="panel highlight-teal">
+          <p class="eyebrow">SEUS DIREITOS</p>
+          <h2>Transparência total</h2>
+          <p>Todas as decisões do Smart Contract são registradas na blockchain. Você pode auditar cada aprovação ou rejeição de forma independente.</p>
+          <a class="button light" href="#transparencia">Ver blockchain</a>
+        </article>
+        <article class="panel flow-panel">
+          <div class="section-title"><div><p class="eyebrow">SEU FLUXO</p><h2>Como funciona</h2></div></div>
+          <ol class="flow" style="grid-template-columns:1fr 1fr">
+            <li><b><i class="ri-alarm-warning-line"></i></b><div><strong>Abra um sinistro</strong><span>Comunique o evento para análise.</span></div></li>
+            <li><b><i class="ri-cpu-line"></i></b><div><strong>Smart Contract decide</strong><span>Regras verificadas automaticamente.</span></div></li>
+            <li><b><i class="ri-check-double-line"></i></b><div><strong>Acompanhe o resultado</strong><span>Aprovação ou rejeição registrada.</span></div></li>
+            <li><b><i class="ri-money-dollar-circle-line"></i></b><div><strong>Receba a indenização</strong><span>Pagamento auditável na blockchain.</span></div></li>
+          </ol>
+        </article>
+      </section>
+
+      <section id="minhas-apolices" class="section">
+        <div class="section-title"><div><p class="eyebrow">MEUS CONTRATOS</p><h2>Minhas apólices</h2></div></div>
+        <div class="panel table-wrap scrollable-panel" id="c-policies-panel">
+          <table><thead><tr><th>Apólice</th><th>Veículo</th><th>Coberturas</th><th>Vigência</th><th>Valor segurado</th><th>Status</th></tr></thead><tbody id="c-policies-body"></tbody></table>
+          <div class="empty" id="c-policies-empty">Nenhuma apólice vinculada ao seu perfil.</div>
+          <div class="scroll-controls" id="c-policies-scroll" style="display:none">
+            <button class="scroll-btn" data-dir="up" data-target="c-policies-panel" aria-label="Rolar para cima"><i class="ri-arrow-up-s-line"></i></button>
+            <span class="scroll-info" id="c-policies-scroll-info"></span>
+            <button class="scroll-btn" data-dir="down" data-target="c-policies-panel" aria-label="Rolar para baixo"><i class="ri-arrow-down-s-line"></i></button>
+          </div>
+        </div>
+      </section>
+
+      <section id="meus-sinistros" class="section">
+        <div class="section-title"><div><p class="eyebrow">MEUS EVENTOS</p><h2>Meus sinistros</h2></div><button class="button secondary" data-open="claim-modal-client"><i class="ri-add-line"></i> Abrir sinistro</button></div>
+        <div class="panel table-wrap scrollable-panel" id="c-claims-panel">
+          <table><thead><tr><th>Sinistro</th><th>Apólice</th><th>Tipo</th><th>Data</th><th>Valor</th><th>Status</th><th>Decisão</th></tr></thead><tbody id="c-claims-body"></tbody></table>
+          <div class="empty" id="c-claims-empty">Nenhum sinistro aberto.</div>
+          <div class="scroll-controls" id="c-claims-scroll" style="display:none">
+            <button class="scroll-btn" data-dir="up" data-target="c-claims-panel" aria-label="Rolar para cima"><i class="ri-arrow-up-s-line"></i></button>
+            <span class="scroll-info" id="c-claims-scroll-info"></span>
+            <button class="scroll-btn" data-dir="down" data-target="c-claims-panel" aria-label="Rolar para baixo"><i class="ri-arrow-down-s-line"></i></button>
+          </div>
+        </div>
+      </section>
+
+      <section id="transparencia" class="section">
+        <div class="section-title">
+          <div><p class="eyebrow">AUDITORIA PÚBLICA</p><h2>Transparência blockchain</h2></div>
+          <span class="chain-state" id="c-chain-state"><span class="dot"></span> Cadeia íntegra</span>
+        </div>
+        <div class="panel ledger scrollable-panel" id="c-ledger-panel">
+          <div id="c-ledger"><div class="empty">Eventos de análise e pagamento aparecerão aqui.</div></div>
+          <div class="scroll-controls" id="c-ledger-scroll" style="display:none">
+            <button class="scroll-btn" data-dir="up" data-target="c-ledger-panel" aria-label="Rolar para cima"><i class="ri-arrow-up-s-line"></i></button>
+            <span class="scroll-info" id="c-ledger-scroll-info"></span>
+            <button class="scroll-btn" data-dir="down" data-target="c-ledger-panel" aria-label="Rolar para baixo"><i class="ri-arrow-down-s-line"></i></button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <dialog id="claim-modal-client">
+      <form id="claim-form-client">
+        <div class="modal-head">
+          <div><p class="eyebrow">NOVO EVENTO</p><h2>Abrir sinistro</h2></div>
+          <button type="button" class="icon-button modal-close-btn" aria-label="Fechar">×</button>
+        </div>
+        <div class="form-grid">
+          <label class="full">Apólice<select required name="policy" id="c-claim-policy"></select></label>
+          <label>Tipo da ocorrência<select required name="type"><option value="COLISAO">Colisão</option><option value="ROUBO">Roubo</option><option value="INCENDIO">Incêndio</option></select></label>
+          <label>Data da ocorrência<input required name="date" type="date" /></label>
+          <label class="full">Valor solicitado<input required name="amount" type="number" min="1" step="0.01" placeholder="15000" /></label>
+        </div>
+        <p class="hint">A decisão será tomada somente pelo Smart Contract.</p>
+        <div class="modal-actions">
+          <button type="button" class="button secondary modal-cancel-btn">Cancelar</button>
+          <button type="submit" class="button primary-teal">Abrir para análise</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="c-analysis-modal"><div id="c-analysis-content"></div></dialog>
+    <div id="toast" role="status"></div>
+    <script src="app.js"></script>
+  </body>
+</html>

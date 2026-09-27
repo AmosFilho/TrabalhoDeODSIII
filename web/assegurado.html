@@ -70,7 +70,7 @@
       <section id="minhas-apolices" class="section">
         <div class="section-title"><div><p class="eyebrow">MEUS CONTRATOS</p><h2>Minhas apólices</h2></div></div>
         <div class="panel table-wrap scrollable-panel" id="c-policies-panel">
-          <table><thead><tr><th>Apólice</th><th>Veículo</th><th>Coberturas</th><th>Vigência</th><th>Valor segurado</th><th>Status</th></tr></thead><tbody id="c-policies-body"></tbody></table>
+          <table><thead><tr><th>Apólice</th><th>Veículo</th><th>Coberturas</th><th>Vigência</th><th>Valor segurado</th><th>Franquia</th><th>Status</th></tr></thead><tbody id="c-policies-body"></tbody></table>
           <div class="empty" id="c-policies-empty">Nenhuma apólice vinculada ao seu perfil.</div>
           <div class="scroll-controls" id="c-policies-scroll" style="display:none">
             <button class="scroll-btn" data-dir="up" data-target="c-policies-panel" aria-label="Rolar para cima"><i class="ri-arrow-up-s-line"></i></button>
@@ -99,7 +99,7 @@
           <span class="chain-state" id="c-chain-state"><span class="dot"></span> Cadeia íntegra</span>
         </div>
         <div class="panel ledger scrollable-panel" id="c-ledger-panel">
-          <div id="c-ledger"><div class="empty">Eventos de análise e pagamento aparecerão aqui.</div></div>
+          <div id="c-ledger"><div class="empty">Emissões, sinistros, análises e pagamentos aparecerão aqui.</div></div>
           <div class="scroll-controls" id="c-ledger-scroll" style="display:none">
             <button class="scroll-btn" data-dir="up" data-target="c-ledger-panel" aria-label="Rolar para cima"><i class="ri-arrow-up-s-line"></i></button>
             <span class="scroll-info" id="c-ledger-scroll-info"></span>
@@ -119,8 +119,9 @@
           <label class="full">Apólice<select required name="policy" id="c-claim-policy"></select></label>
           <label>Tipo da ocorrência<select required name="type"><option value="COLISAO">Colisão</option><option value="ROUBO">Roubo</option><option value="INCENDIO">Incêndio</option></select></label>
           <label>Data da ocorrência<input required name="date" type="date" /></label>
-          <label class="full">Valor solicitado<input required name="amount" type="number" min="1" step="0.01" placeholder="15000" /></label>
+          <label class="full">Valor do prejuízo<input required name="amount" type="text" inputmode="numeric" autocomplete="off" data-money placeholder="R$ 0,00" /></label>
         </div>
+        <div class="claim-info" id="c-claim-policy-info"></div>
         <p class="hint">A decisão será tomada somente pelo Smart Contract.</p>
         <div class="modal-actions">
           <button type="button" class="button secondary modal-cancel-btn">Cancelar</button>

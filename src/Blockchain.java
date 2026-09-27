@@ -58,6 +58,59 @@ public class Blockchain {
     }
   }
 
+  public void replaceGenesis(Block genesis) {
+    if (genesis != null && genesis.getIndex() == 0) {
+      blocks.set(0, genesis);
+    }
+  }
+
+  public String validationError(int i) {
+    Block b = blocks.get(i);
+
+    if (b.getHash() == null || !b.getHash().equals(Block.calculateHash(b))) {
+      return "Hash não confere com o conteúdo do bloco (dados adulterados?)";
+    }
+
+    if (i == 0) {
+      // O genesis usa previousHash = "0" (convenção)
+      if (b.getIndex() != 0 || !"0".equals(b.getPreviousHash())) {
+        return "Gênesis deve ter índice 0 e hash anterior \"0\"";
+      }
+      return null;
+    }
+
+    Block previous = blocks.get(i - 1);
+
+    if (previous.getIndex() + 1 != b.getIndex()) {
+      return "Índice fora de sequência";
+    }
+
+    if (b.getPreviousHash() == null || !b.getPreviousHash().equals(previous.getHash())) {
+      return "Hash anterior não aponta para o bloco #" + previous.getIndex();
+    }
+
+    return null;
+  }
+
+  public int repair() {
+    int repaired = 0;
+
+    for (int i = 0; i < blocks.size(); i++) {
+      if (validationError(i) == null) {
+        continue;
+      }
+
+      Block old = blocks.get(i);
+      String previousHash = i == 0 ? "0" : blocks.get(i - 1).getHash();
+      Block fixed = new Block(i, old.getTimestamp(), previousHash, old.getData());
+      fixed.proofOfWork(difficulty);
+      blocks.set(i, fixed);
+      repaired++;
+    }
+
+    return repaired;
+  }
+
   public boolean isFirstBlockValid() {
     Block firstBlock = blocks.get(0);
 
@@ -65,17 +118,7 @@ public class Blockchain {
       return false;
     }
 
-    // O genesis usa previousHash = "0" (convenção)
-    if (firstBlock.getPreviousHash() == null || !firstBlock.getPreviousHash().equals("0")) {
-      return false;
-    }
-
-    if (firstBlock.getHash() == null || 
-          !Block.calculateHash(firstBlock).equals(firstBlock.getHash())) {
-      return false;
-    }
-
-    return true;
+    return validationError(0) == null;
   }
 
   public boolean isValidNewBlock(Block newBlock, Block previousBlock) {

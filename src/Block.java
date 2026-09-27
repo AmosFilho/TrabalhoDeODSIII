@@ -1,4 +1,5 @@
 
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
@@ -82,7 +83,7 @@ public class Block {
       }
 			
       String txt = block.str();
-      final byte bytes[] = digest.digest(txt.getBytes());
+      final byte bytes[] = digest.digest(txt.getBytes(StandardCharsets.UTF_8));
       final StringBuilder builder = new StringBuilder();
 			
       for (final byte b : bytes) {

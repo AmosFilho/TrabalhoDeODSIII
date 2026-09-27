@@ -545,6 +545,48 @@ legend { font-size: 12px; font-weight: 700; color: #465169; margin-bottom: 10px;
   z-index: 1000;
 }
 #toast.show { opacity: 1; transform: translateY(0); }
+#toast.ok { border-left: 4px solid #3ecf8e; }
+#toast.error { border-left: 4px solid #f97066; }
+
+body.is-busy { cursor: progress; }
+body.is-busy [data-action], body.is-busy button[type=submit], body.is-busy #repair-chain { opacity: .6; pointer-events: none; }
+
+.claim-info:empty { display: none; }
+.claim-info {
+  background: var(--page);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  font-size: 13px;
+}
+.claim-info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.claim-info-grid span { display: block; color: var(--muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+.claim-info-grid strong { font-size: 15px; }
+.claim-info p { margin: 10px 0 0; }
+.claim-info .warn { color: var(--amber); font-weight: 600; }
+
+.analysis-result.pending { background: var(--amber-bg); color: var(--amber); }
+.breakdown { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 14px; }
+.breakdown td { padding: 8px 0; border-bottom: 1px solid var(--line); }
+.breakdown td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+.breakdown .total td { font-weight: 800; border-bottom: 0; color: var(--green); }
+.claim-history { list-style: none; padding: 0; margin: 0 0 8px; font-size: 13px; }
+.claim-history li { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.claim-history li:last-child { border-bottom: 0; }
+.claim-history li > span:nth-child(2) { flex: 1; font-weight: 600; }
+.claim-history small { display: block; color: var(--muted); font-weight: 400; }
+.claim-history code { font-size: 11px; color: var(--muted); }
+.claim-history li.invalid { color: var(--red); }
+.history-index { display: grid; place-items: center; min-width: 34px; height: 26px; border-radius: 6px; background: var(--blue-light); color: var(--blue); font-weight: 700; font-size: 12px; }
+
+.chain-state.invalid { color: var(--red); }
+.event.invalid { background: var(--red-bg); }
+.event.invalid .event-icon { background: var(--red); color: #fff; }
+.event .block-error { color: var(--red); font-weight: 600; }
+.button.danger { background: var(--red); color: #fff; border: 0; }
+.button.danger:hover { filter: brightness(.92); }
+.button[hidden] { display: none; }
 
 /* ===== Responsive ===== */
 @media (max-width: 900px) {

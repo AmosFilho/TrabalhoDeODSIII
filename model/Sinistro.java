@@ -2,6 +2,9 @@ package model;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Evento comunicado pelo cliente que pode gerar indenização.
@@ -18,6 +21,10 @@ public class Sinistro {
 
     // Preenchido pelo SmartContract: por que foi aprovado ou rejeitado.
     private String motivo;
+
+    private BigDecimal franquiaAplicada = BigDecimal.ZERO;
+    private BigDecimal valorIndenizacao = BigDecimal.ZERO;
+    private List<String> regrasVerificadas = new ArrayList<>();
 
     /**
      * === PONTO DE INTEGRAÇÃO COM A BLOCKCHAIN ===
@@ -48,6 +55,9 @@ public class Sinistro {
     public StatusSinistro getStatus() { return status; }
     public String getMotivo() { return motivo; }
     public String getHashBlockchain() { return hashBlockchain; }
+    public BigDecimal getFranquiaAplicada() { return franquiaAplicada; }
+    public BigDecimal getValorIndenizacao() { return valorIndenizacao; }
+    public List<String> getRegrasVerificadas() { return Collections.unmodifiableList(regrasVerificadas); }
 
     /**
      * Propositalmente sem "public": a única forma correta de mudar o
@@ -60,6 +70,12 @@ public class Sinistro {
     void atualizarStatus(StatusSinistro novoStatus, String motivo) {
         this.status = novoStatus;
         this.motivo = motivo;
+    }
+
+    void registrarCalculo(BigDecimal franquiaAplicada, BigDecimal valorIndenizacao, List<String> regras) {
+        this.franquiaAplicada = franquiaAplicada == null ? BigDecimal.ZERO : franquiaAplicada;
+        this.valorIndenizacao = valorIndenizacao == null ? BigDecimal.ZERO : valorIndenizacao;
+        this.regrasVerificadas = regras == null ? new ArrayList<>() : new ArrayList<>(regras);
     }
 
     void registrarHashBlockchain(String hash) {

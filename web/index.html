@@ -56,7 +56,7 @@
           <ol class="flow">
             <li><b><i class="ri-file-add-line"></i></b><div><strong>Emitir apólice</strong><span>Defina veículo, coberturas e limite.</span></div></li>
             <li><b><i class="ri-alarm-warning-line"></i></b><div><strong>Cliente abre sinistro</strong><span>O evento fica em análise.</span></div></li>
-            <li><b><i class="ri-cpu-line"></i></b><div><strong>Smart Contract valida</strong><span>Vigência, cobertura e valor são verificados.</span></div></li>
+            <li><b><i class="ri-cpu-line"></i></b><div><strong>Smart Contract valida</strong><span>Vigência, cobertura, franquia e saldo são verificados.</span></div></li>
             <li><b><i class="ri-link-unlink-m"></i></b><div><strong>Pagamento auditável</strong><span>Decisão e pagamento entram na blockchain.</span></div></li>
           </ol>
         </article>
@@ -69,7 +69,7 @@
       <section id="apolices" class="section">
         <div class="section-title"><div><p class="eyebrow">CARTEIRA</p><h2>Apólices</h2></div><button class="button secondary" data-open="policy-modal"><i class="ri-add-line"></i> Emitir apólice</button></div>
         <div class="panel table-wrap scrollable-panel" id="policies-panel">
-          <table><thead><tr><th>Apólice</th><th>Cliente / veículo</th><th>Coberturas</th><th>Vigência</th><th>Status</th><th></th></tr></thead><tbody id="policies-body"></tbody></table>
+          <table><thead><tr><th>Apólice</th><th>Cliente / veículo</th><th>Coberturas</th><th>Vigência</th><th>Saldo / limite</th><th>Status</th><th></th></tr></thead><tbody id="policies-body"></tbody></table>
           <div class="empty" id="policies-empty">Ainda não há apólices emitidas.</div>
           <div class="scroll-controls" id="policies-scroll" style="display:none">
             <button class="scroll-btn" data-dir="up" data-target="policies-panel" aria-label="Rolar para cima"><i class="ri-arrow-up-s-line"></i></button>
@@ -97,6 +97,7 @@
           <div><p class="eyebrow">IMUTABILIDADE</p><h2>Auditoria blockchain</h2></div>
           <div class="chain-controls">
             <span class="chain-state" id="chain-state"><span class="dot"></span> Cadeia íntegra</span>
+            <button type="button" class="button danger" id="repair-chain" hidden><i class="ri-tools-line"></i> Reparar cadeia</button>
             <div class="difficulty-control">
               <label for="difficulty-slider"><i class="ri-settings-4-line"></i> Dificuldade:</label>
               <input type="range" id="difficulty-slider" min="1" max="6" value="2" />
@@ -105,7 +106,7 @@
           </div>
         </div>
         <div class="panel ledger scrollable-panel" id="ledger-panel">
-          <div id="ledger"><div class="empty">Eventos de análise e pagamento aparecerão aqui.</div></div>
+          <div id="ledger"><div class="empty">Emissões, sinistros, análises e pagamentos aparecerão aqui.</div></div>
           <div class="scroll-controls" id="ledger-scroll" style="display:none">
             <button class="scroll-btn" data-dir="up" data-target="ledger-panel" aria-label="Rolar para cima"><i class="ri-arrow-up-s-line"></i></button>
             <span class="scroll-info" id="ledger-scroll-info"></span>
@@ -125,9 +126,11 @@
       <label>Nome do cliente<input required name="client" placeholder="Ex.: João Silva" /></label>
       <label>Carteira do cliente<input required name="wallet" placeholder="Ex.: 0xJOAO..." /></label>
       <label>Modelo do veículo<input required name="vehicle" placeholder="Ex.: Toyota Corolla" /></label>
-      <label>Placa<input required name="plate" placeholder="ABC-1234" /></label>
-      <label>Ano<input required name="year" type="number" min="1900" max="2100" value="2024" /></label>
-      <label>Valor segurado<input required name="coverageValue" type="number" min="1" step="0.01" placeholder="80000" /></label>
+      <label>Placa<input required name="plate" type="text" autocomplete="off" data-plate placeholder="ABC-1234 ou ABC1D23" /></label>
+      <label>Ano<input required name="year" type="text" inputmode="numeric" autocomplete="off" data-digits="4" value="2024" placeholder="AAAA" /></label>
+      <label>Valor segurado (limite total)<input required name="coverageValue" type="text" inputmode="numeric" autocomplete="off" data-money placeholder="R$ 0,00" /></label>
+      <label>Franquia<input required name="franchise" type="text" inputmode="numeric" autocomplete="off" data-money value="R$ 0,00" /></label>
+      <p class="hint full" id="policy-rules-hint">Digite só números: os centavos entram pela direita (1500000 → R$ 15.000,00). A franquia é descontada dos danos parciais, até <span data-max-franchise>20</span>% do valor segurado; roubo e perda total não têm franquia. O valor segurado é o limite somado de todas as indenizações.</p>
       <label>Início da vigência<input required name="start" type="date" /></label>
       <label>Fim da vigência<input required name="end" type="date" /></label>
     </div>
@@ -154,8 +157,9 @@
           <label class="full">Apólice<select required name="policy" id="claim-policy"></select></label>
           <label>Tipo da ocorrência<select required name="type"><option value="COLISAO">Colisão</option><option value="ROUBO">Roubo</option><option value="INCENDIO">Incêndio</option></select></label>
           <label>Data da ocorrência<input required name="date" type="date" /></label>
-          <label class="full">Valor solicitado<input required name="amount" type="number" min="1" step="0.01" placeholder="15000" /></label>
+          <label class="full">Valor do prejuízo<input required name="amount" type="text" inputmode="numeric" autocomplete="off" data-money placeholder="R$ 0,00" /></label>
         </div>
+        <div class="claim-info" id="claim-policy-info"></div>
         <p class="hint">A decisão será tomada somente pelo Smart Contract após a abertura.</p>
         <div class="modal-actions">
           <button type="button" class="button secondary modal-cancel-btn">Cancelar</button>

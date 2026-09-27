@@ -15,12 +15,16 @@ import java.util.Map;
  */
 public class Apolice {
 
+    public static final int PERCENTUAL_MAXIMO_FRANQUIA = 20;
+
     private final String id;
     private final Cliente cliente;
     private final Veiculo veiculo;
     private final Seguradora seguradora;
     private final Map<TipoCobertura, Boolean> coberturas;
     private final BigDecimal valorSegurado;
+
+    private final BigDecimal franquia;
     private final LocalDate dataInicio;
     private final LocalDate dataFim;
     private StatusApolice status;
@@ -29,12 +33,20 @@ public class Apolice {
     public Apolice(String id, Cliente cliente, Veiculo veiculo, Seguradora seguradora,
                     Map<TipoCobertura, Boolean> coberturas, BigDecimal valorSegurado,
                     LocalDate dataInicio, LocalDate dataFim, StatusApolice status) {
+        this(id, cliente, veiculo, seguradora, coberturas, valorSegurado, BigDecimal.ZERO,
+                dataInicio, dataFim, status);
+    }
+
+    public Apolice(String id, Cliente cliente, Veiculo veiculo, Seguradora seguradora,
+                    Map<TipoCobertura, Boolean> coberturas, BigDecimal valorSegurado, BigDecimal franquia,
+                    LocalDate dataInicio, LocalDate dataFim, StatusApolice status) {
         this.id = id;
         this.cliente = cliente;
         this.veiculo = veiculo;
         this.seguradora = seguradora;
         this.coberturas = new EnumMap<>(coberturas);
         this.valorSegurado = valorSegurado;
+        this.franquia = franquia == null ? BigDecimal.ZERO : franquia;
         this.dataInicio = dataInicio;
         this.dataFim = dataFim;
         this.status = status;
@@ -45,6 +57,7 @@ public class Apolice {
     public Veiculo getVeiculo() { return veiculo; }
     public Seguradora getSeguradora() { return seguradora; }
     public BigDecimal getValorSegurado() { return valorSegurado; }
+    public BigDecimal getFranquia() { return franquia; }
     public LocalDate getDataInicio() { return dataInicio; }
     public LocalDate getDataFim() { return dataFim; }
     public StatusApolice getStatus() { return status; }
@@ -61,6 +74,20 @@ public class Apolice {
 
     public boolean possuiCobertura(TipoCobertura tipo) {
         return coberturas.getOrDefault(tipo, false);
+    }
+
+    public BigDecimal getValorComprometido() {
+        BigDecimal total = BigDecimal.ZERO;
+        for (Sinistro s : sinistros) {
+            if (s.getStatus() == StatusSinistro.APROVADO || s.getStatus() == StatusSinistro.PAGO) {
+                total = total.add(s.getValorIndenizacao());
+            }
+        }
+        return total;
+    }
+
+    public BigDecimal getSaldoDisponivel() {
+        return valorSegurado.subtract(getValorComprometido()).max(BigDecimal.ZERO);
     }
 
     /** Vigente = status ATIVA e a data informada está dentro do período contratado. */

@@ -2,10 +2,13 @@ package contract;
 
 import model.Apolice;
 import model.Sinistro;
+import model.TipoCobertura;
 
 import java.math.BigDecimal;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * ============================================================================
@@ -45,6 +48,8 @@ import java.util.List;
  */
 public final class SmartContract {
 
+    public static final int PERCENTUAL_PERDA_TOTAL = 75;
+
     private SmartContract() {
         // classe utilitária, apenas com métodos estáticos
     }
@@ -79,22 +84,61 @@ public final class SmartContract {
         }
         regras.add("✓ Cobertura contempla o tipo de sinistro");
 
-        // 4) O valor solicitado está dentro do limite (valor segurado)?
         BigDecimal valorSolicitado = sinistro.getValorSolicitado();
-        BigDecimal limite = apolice.getValorSegurado();
-        if (valorSolicitado.compareTo(limite) > 0) {
-            regras.add("✗ Valor solicitado dentro do limite segurado");
+        BigDecimal limitePerdaTotal = apolice.getValorSegurado()
+                .multiply(BigDecimal.valueOf(PERCENTUAL_PERDA_TOTAL))
+                .divide(BigDecimal.valueOf(100));
+        BigDecimal franquia;
+        if (sinistro.getTipo() == TipoCobertura.ROUBO) {
+            franquia = BigDecimal.ZERO;
+            regras.add("✓ Franquia não se aplica: roubo é indenizado integralmente");
+        } else if (valorSolicitado.compareTo(limitePerdaTotal) >= 0) {
+            franquia = BigDecimal.ZERO;
+            regras.add("✓ Franquia não se aplica: perda total (prejuízo de " + brl(valorSolicitado)
+                    + " ≥ " + PERCENTUAL_PERDA_TOTAL + "% do valor segurado)");
+        } else {
+            franquia = apolice.getFranquia();
+            if (valorSolicitado.compareTo(franquia) <= 0) {
+                regras.add("✗ Prejuízo (" + brl(valorSolicitado) + ") não supera a franquia ("
+                        + brl(franquia) + ")");
+                return new ResultadoAnalise(
+                        false,
+                        "Dano parcial de " + brl(valorSolicitado) + " fica abaixo da franquia de "
+                                + brl(franquia) + ": o valor fica por conta do segurado e não há indenização.",
+                        regras,
+                        franquia,
+                        BigDecimal.ZERO);
+            }
+            regras.add("✓ Prejuízo (" + brl(valorSolicitado) + ") supera a franquia (" + brl(franquia) + ")");
+        }
+
+        BigDecimal indenizacao = valorSolicitado.subtract(franquia);
+        BigDecimal saldo = apolice.getSaldoDisponivel();
+        if (indenizacao.compareTo(saldo) > 0) {
+            regras.add("✗ Indenização (" + brl(indenizacao) + ") excede o saldo da apólice (" + brl(saldo) + ")");
             return new ResultadoAnalise(
                     false,
-                    "Valor solicitado (R$ " + valorSolicitado + ") excede o valor segurado (R$ " + limite + ").",
-                    regras);
+                    "A indenização de " + brl(indenizacao) + " excede o saldo disponível da apólice ("
+                            + brl(saldo) + " de " + brl(apolice.getValorSegurado()) + ").",
+                    regras,
+                    franquia,
+                    BigDecimal.ZERO);
         }
-        regras.add("✓ Valor solicitado dentro do limite segurado");
+        regras.add("✓ Indenização (" + brl(indenizacao) + ") cabe no saldo da apólice (" + brl(saldo) + ")");
 
         // Todas as regras passaram -> aprova
+        String calculo = franquia.signum() == 0
+                ? "sem franquia"
+                : brl(valorSolicitado) + " solicitados - " + brl(franquia) + " de franquia";
         return new ResultadoAnalise(
                 true,
-                "Sinistro aprovado: todas as regras da apólice foram atendidas.",
-                regras);
+                "Sinistro aprovado: indenização de " + brl(indenizacao) + " (" + calculo + ").",
+                regras,
+                franquia,
+                indenizacao);
+    }
+
+    private static String brl(BigDecimal valor) {
+        return NumberFormat.getCurrencyInstance(Locale.forLanguageTag("pt-BR")).format(valor);
     }
 }

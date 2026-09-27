@@ -43,6 +43,7 @@ public class Main {
         Apolice apolice = seguradora.criarApolice(
                 "001", joao, corolla, coberturas,
                 new BigDecimal("80000"),
+                new BigDecimal("2000"),
                 LocalDate.of(2026, 1, 1),
                 LocalDate.of(2027, 1, 1));
 

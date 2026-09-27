@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -59,10 +59,55 @@ public class Seguradora {
     public Apolice criarApolice(String id, Cliente cliente, Veiculo veiculo,
                                  Map<TipoCobertura, Boolean> coberturas, BigDecimal valorSegurado,
                                  LocalDate dataInicio, LocalDate dataFim) {
-        Apolice apolice = new Apolice(id, cliente, veiculo, this, coberturas, valorSegurado,
+        return criarApolice(id, cliente, veiculo, coberturas, valorSegurado, BigDecimal.ZERO, dataInicio, dataFim);
+    }
+
+    public Apolice criarApolice(String id, Cliente cliente, Veiculo veiculo,
+                                 Map<TipoCobertura, Boolean> coberturas, BigDecimal valorSegurado,
+                                 BigDecimal franquia, LocalDate dataInicio, LocalDate dataFim) {
+        if (valorSegurado.signum() <= 0) {
+            throw new IllegalArgumentException("O valor segurado deve ser maior que zero.");
+        }
+        BigDecimal franquiaMaxima = valorSegurado
+                .multiply(BigDecimal.valueOf(Apolice.PERCENTUAL_MAXIMO_FRANQUIA))
+                .divide(BigDecimal.valueOf(100));
+        if (franquia.signum() < 0 || franquia.compareTo(franquiaMaxima) > 0) {
+            throw new IllegalArgumentException("A franquia deve estar entre R$ 0,00 e "
+                    + Apolice.PERCENTUAL_MAXIMO_FRANQUIA + "% do valor segurado.");
+        }
+        if (dataFim.isBefore(dataInicio)) {
+            throw new IllegalArgumentException("A vigência final deve ser posterior à inicial.");
+        }
+
+        Apolice apolice = new Apolice(id, cliente, veiculo, this, coberturas, valorSegurado, franquia,
                 dataInicio, dataFim, StatusApolice.ATIVA);
         apolices.add(apolice);
         cliente.vincularApolice(apolice);
+
+        if (registradorBlockchain != null) {
+            List<String> cobertas = new ArrayList<>();
+            for (TipoCobertura t : TipoCobertura.values()) {
+                if (apolice.possuiCobertura(t)) cobertas.add(t.name());
+            }
+
+            Map<String, Object> dados = new LinkedHashMap<>();
+            dados.put("idApolice", id);
+            dados.put("idCliente", cliente.getId());
+            dados.put("cliente", cliente.getNome());
+            dados.put("wallet", cliente.getWallet());
+            dados.put("idVeiculo", veiculo.getId());
+            dados.put("modelo", veiculo.getModelo());
+            dados.put("placa", veiculo.getPlaca());
+            dados.put("ano", veiculo.getAno());
+            dados.put("identificador", veiculo.getIdentificador());
+            dados.put("coberturas", String.join(",", cobertas));
+            dados.put("valorSegurado", valorSegurado);
+            dados.put("franquia", franquia);
+            dados.put("inicio", dataInicio.toString());
+            dados.put("fim", dataFim.toString());
+            registradorBlockchain.registrarTransacao("APOLICE_EMITIDA", dados);
+        }
+
         return apolice;
     }
 
@@ -76,10 +121,25 @@ public class Seguradora {
 
     /** Cria o registro do sinistro (status inicial EM_ANALISE). Ainda não passou pelo SmartContract. */
     public Sinistro registrarSinistro(Apolice apolice, TipoCobertura tipo, BigDecimal valorSolicitado, LocalDate data) {
-        String sinistroId = String.valueOf(sinistros.size() + 1);
+        if (valorSolicitado.signum() <= 0) {
+            throw new IllegalArgumentException("O valor solicitado deve ser maior que zero.");
+        }
+
+        String sinistroId = String.format("SIN-%04d", sinistros.size() + 1);
         Sinistro sinistro = new Sinistro(sinistroId, apolice, tipo, valorSolicitado, data);
         apolice.adicionarSinistro(sinistro);
         sinistros.add(sinistro);
+
+        if (registradorBlockchain != null) {
+            Map<String, Object> dados = new LinkedHashMap<>();
+            dados.put("idSinistro", sinistroId);
+            dados.put("idApolice", apolice.getId());
+            dados.put("tipo", tipo.name());
+            dados.put("valorSolicitado", valorSolicitado);
+            dados.put("data", data.toString());
+            sinistro.registrarHashBlockchain(registradorBlockchain.registrarTransacao("SINISTRO_ABERTO", dados));
+        }
+
         return sinistro;
     }
 
@@ -108,15 +168,21 @@ public class Seguradora {
 
         StatusSinistro novoStatus = resultado.isAprovado() ? StatusSinistro.APROVADO : StatusSinistro.REJEITADO;
         sinistro.atualizarStatus(novoStatus, resultado.getMotivo());
+        sinistro.registrarCalculo(resultado.getFranquia(), resultado.getValorIndenizacao(),
+                resultado.getRegrasVerificadas());
 
         if (registradorBlockchain != null) {
-            Map<String, Object> dados = new HashMap<>();
+            Map<String, Object> dados = new LinkedHashMap<>();
             dados.put("idSinistro", sinistro.getId());
             dados.put("idApolice", sinistro.getApolice().getId());
             dados.put("tipo", sinistro.getTipo().name());
             dados.put("valorSolicitado", sinistro.getValorSolicitado());
+            dados.put("franquiaApolice", sinistro.getApolice().getFranquia());
+            dados.put("franquia", resultado.getFranquia());
+            dados.put("valorIndenizacao", resultado.getValorIndenizacao());
             dados.put("aprovado", resultado.isAprovado());
             dados.put("motivo", resultado.getMotivo());
+            dados.put("regras", String.join("\n", resultado.getRegrasVerificadas()));
 
             String hash = registradorBlockchain.registrarTransacao("ANALISE_SINISTRO", dados);
             sinistro.registrarHashBlockchain(hash);
@@ -146,16 +212,34 @@ public class Seguradora {
         sinistro.atualizarStatus(StatusSinistro.PAGO, sinistro.getMotivo());
 
         if (registradorBlockchain != null) {
-            Map<String, Object> dados = new HashMap<>();
+            Map<String, Object> dados = new LinkedHashMap<>();
             dados.put("idSinistro", sinistro.getId());
             dados.put("idApolice", sinistro.getApolice().getId());
-            dados.put("valorPago", sinistro.getValorSolicitado());
+            dados.put("valorPago", sinistro.getValorIndenizacao());
             dados.put("walletOrigem", this.wallet);
             dados.put("walletDestino", sinistro.getApolice().getCliente().getWallet());
 
             String hash = registradorBlockchain.registrarTransacao("PAGAMENTO_SINISTRO", dados);
             sinistro.registrarHashBlockchain(hash);
         }
+    }
+
+    public Apolice buscarApolice(String id) {
+        return apolices.stream().filter(a -> a.getId().equals(id)).findFirst().orElse(null);
+    }
+
+    public Sinistro buscarSinistro(String id) {
+        return sinistros.stream().filter(s -> s.getId().equals(id)).findFirst().orElse(null);
+    }
+
+    void restaurarApolice(Apolice apolice) {
+        apolices.add(apolice);
+        apolice.getCliente().vincularApolice(apolice);
+    }
+
+    void restaurarSinistro(Sinistro sinistro) {
+        sinistro.getApolice().adicionarSinistro(sinistro);
+        sinistros.add(sinistro);
     }
 
     @Override

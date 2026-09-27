@@ -25,7 +25,49 @@ sinistros passam pelas entidades Java existentes (`Seguradora`, `Apolice`,
 `RegistradorBlockchain`, que chama `Blockchain.newBlock` e
 `Blockchain.addBlock` do repositório.
 
-Os dados de auditoria ficam em `data/segurochain-ledger.tsv`. Esse arquivo é
-recarregado ao reiniciar o servidor e os blocos, hashes e hashes anteriores
-podem ser vistos na seção **Auditoria blockchain** da aplicação.
+### Persistência pela blockchain
+
+A blockchain é a única fonte de dados persistida, em `data/segurochain-ledger.tsv`
+(incluindo o bloco gênesis). Todo evento vira um bloco com payload
+`TIPO | {json}`:
+
+| Evento | Quando |
+|---|---|
+| `APOLICE_EMITIDA` | emissão da apólice (cliente, veículo, coberturas, valor segurado, franquia, vigência) |
+| `SINISTRO_ABERTO` | abertura do sinistro |
+| `ANALISE_SINISTRO` | decisão do Smart Contract (regras, franquia, indenização, motivo) |
+| `PAGAMENTO_SINISTRO` | pagamento da indenização |
+
+Ao iniciar, o servidor relê os blocos em ordem e reconstrói apólices e
+sinistros (`model/ReconstrucaoHistorico`). Na tela de decisão de cada sinistro
+aparece o histórico de blocos relacionados a ele.
+
+### Regras do Smart Contract
+
+1. a apólice existe;
+2. está vigente na data do sinistro;
+3. a cobertura contempla o tipo de sinistro;
+4. a **franquia** se aplica? Não em **roubo** nem em **perda total** (prejuízo
+   ≥ 75% do valor segurado): nesses casos a indenização é integral. Em dano
+   parcial, o prejuízo precisa superar a franquia;
+5. a indenização (prejuízo − franquia aplicada) cabe no **saldo** da apólice.
+   O valor segurado é o limite total: indenizações aprovadas ou pagas consomem
+   esse saldo.
+
+Na emissão, a franquia pode ser no máximo 20% do valor segurado.
+
+### Formato dos valores
+
+Os campos de dinheiro aceitam só dígitos e se formatam sozinhos
+(`R$ 1.234,56`, com os centavos entrando pela direita). A API recebe os valores
+sempre como `1234.56` e recusa vírgula, separador de milhar, notação científica
+ou mais de 2 casas decimais. O ano do veículo deve ter 4 dígitos e a placa segue
+o padrão antigo (`ABC-1234`) ou Mercosul (`ABC1D23`).
+
+### Integridade e reparo da cadeia
+
+A seção **Auditoria blockchain** valida bloco a bloco e mostra o motivo de cada
+bloco inválido (hash que não confere com o conteúdo, hash anterior quebrado ou
+índice fora de sequência). O botão **Reparar cadeia** reencadeia e reminera o
+primeiro bloco inválido e todos os seguintes, mantendo os dados de cada bloco.
 

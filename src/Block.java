@@ -1,4 +1,5 @@
 
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
@@ -21,6 +22,19 @@ public class Block {
     hash = Block.calculateHash(this);
   }
 
+  /**
+   * Construtor de reconstrução: recria um bloco exatamente como foi
+   * persistido, sem recalcular hash nem refazer proof-of-work.
+   */
+  public Block(int index, long timestamp, String previousHash, String data, int nonce, String hash) {
+    this.index = index;
+    this.timestamp = timestamp;
+    this.previousHash = previousHash;
+    this.data = data;
+    this.nonce = nonce;
+    this.hash = hash;
+  }
+
   public int getIndex() {
     return index;
   }
@@ -41,6 +55,10 @@ public class Block {
     return data;
   }
 
+  public int getNonce() {
+    return nonce;
+  }
+
   public String str() {
     return index + timestamp + previousHash + data + nonce;
   }
@@ -49,6 +67,7 @@ public class Block {
     StringBuilder builder = new StringBuilder();
     builder.append("Block #").append(index).append(" [previousHash : ").append(previousHash).append(", ").
     append("timestamp : ").append(new Date(timestamp)).append(", ").append("data : ").append(data).append(", ").
+    append("nonce : ").append(nonce).append(", ").
     append("hash : ").append(hash).append("]");
     return builder.toString();
   }
@@ -64,7 +83,7 @@ public class Block {
       }
 			
       String txt = block.str();
-      final byte bytes[] = digest.digest(txt.getBytes());
+      final byte bytes[] = digest.digest(txt.getBytes(StandardCharsets.UTF_8));
       final StringBuilder builder = new StringBuilder();
 			
       for (final byte b : bytes) {
